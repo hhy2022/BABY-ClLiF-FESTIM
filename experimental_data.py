@@ -49,6 +49,17 @@ RUN_TEMP_C = {
     12: 685.0,
 }  # general.json temperature_salt
 
+# Vessel geometry [m]
+CM = 1e-2
+R_HEATER = 0.439 * CM  # heater well radius
+R_CLLIF = 7.000 * CM  # inner radius of the vessel
+R_INCONEL = 7.300 * CM  # outer radius of the vessel
+T_BOTTOM = 0.300 * CM  # bottom-plate thickness
+T_HEATER_GAP = 0.878 * CM  # melt below the heater tip
+T_CLLIF = (6.388 + 0.13022) * CM  # melt depth
+T_GAP = 4.605 * CM  # side wall above the melt
+T_CAP = 1.422 * CM  # top-cap thickness
+
 _MEMO = {}
 
 
