@@ -1,0 +1,13 @@
+{
+ "_note": "Foil-measured neutron rates that are not yet in the run's published LIBRA processed_data.json (the corrections are open pull requests upstream). They replace the LIBRA value: the production is rate x rho_r. For a training run, rho_r gets a log-normal prior centred on 1 with the given relative width (the scatter of the foil measurement), the same treatment as runs 1-3, whose foil-measured rates are in their LIBRA files; a held-out run keeps rho_r = 1.",
+ "4": {
+  "rate": 83592319.3583453,
+  "rel_sigma": 0.0703,
+  "source": "LIBRA-project/BABY-1L-run-4, open PR #26 (branch 'correction', head 597b611): analysis/neutron/foil_analysis.ipynb with both foils, 'Fix Run 4 neutron analysis' (bf86903) and the processed_data.json it produces (bc4dc6b): 8.359e7 +/- 5.88e6 n/s. The published v0.1 / main value 7.998e7 +/- 1.50e6 n/s is the Zr foil only: the notebook reset the list of estimates after it had been filled with the Nb ones. Not yet merged."
+ },
+ "12": {
+  "rate": 1.842e9,
+  "rel_sigma": 0.0943,
+  "source": "LIBRA-project/BABY-1L-run-12, open PR #3 'Foil analysis' (cdunn314, 2026-08-24, head 357b5ce), analysis/neutron/foil_analysis_HPGe.ipynb: 'Average neutron rate: 1.842e+09 +/- 1.737e+08 n/s' = mean and sample std (ddof=1) of the foil x count estimates Zr#3 1.673e9, Zr#4 1.834e9, Nb#1 count 1 2.020e9, after a z-score (1.5) cut that removed Nb#1 count 2 (1.062e9); Nb#2 excluded by the author (count rate ~2x expected). Not yet merged: the main-branch processed_data.json still carries the nominal 1.82e9 with no error."
+ }
+}
