@@ -386,7 +386,7 @@ if __name__ == "__main__":
         "--dt-max-fast",
         type=float,
         default=300.0,
-        help="largest step [s] in the fast sparged phases; 0: 7200 s throughout (the manuscript's point)",
+        help="largest step [s] in the fast sparged phases; 0: 7200 s throughout",
     )
     a = ap.parse_args()
     run_chain(a.params, a.out, [int(r) for r in a.runs.split(",")], a.dt_max_fast)
