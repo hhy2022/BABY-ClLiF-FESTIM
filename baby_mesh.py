@@ -1,9 +1,16 @@
+"""2-D axisymmetric (r, z) mesh of the BABY-1L vessel: ClLiF melt (group 3) in Inconel 625 (group 1).
+
+    python baby_mesh.py [--gui]      -> baby_2d.msh
+The boundary groups (11-33, 99) are the ID_* constants of baby_festim.py.
+"""
 import gmsh
+
+import experimental_data
 
 
 def generate_baby_upper_2d_mesh(
     fname="baby_2d.msh",
-    show_gui=True,
+    show_gui=False,
     mesh_size=0.001,
 ):
     gmsh.initialize()
@@ -18,9 +25,9 @@ def generate_baby_upper_2d_mesh(
     # Radial dimensions [m]
     # =========================================================
     r_axis = 0.0
-    r_heater = 0.439 * cm
-    r_cllif = 7.000 * cm
-    r_inconel = 7.300 * cm
+    r_heater = experimental_data.R_HEATER
+    r_cllif = experimental_data.R_CLLIF
+    r_inconel = experimental_data.R_INCONEL
 
     # =========================================================
     # Axial thicknesses [m]
@@ -28,13 +35,13 @@ def generate_baby_upper_2d_mesh(
     t_base = 0.786 * cm
     t_alumina = 0.635 * cm
     t_he = 0.600 * cm
-    t_inconel = 0.300 * cm
-    t_heater_gap = 0.878 * cm
-    t_cllif = (6.388 + 0.13022) * cm
-    t_gap = 4.605 * cm
-    t_cap = 1.422 * cm
+    t_inconel = experimental_data.T_BOTTOM
+    t_heater_gap = experimental_data.T_HEATER_GAP
+    t_cllif = experimental_data.T_CLLIF
+    t_gap = experimental_data.T_GAP
+    t_cap = experimental_data.T_CAP
     # =========================================================
-    # Axial coordinates [cm]
+    # Axial coordinates [m]
     # =========================================================
     y0 = 0.0
     y1 = y0 + t_base
@@ -327,4 +334,6 @@ def generate_baby_upper_2d_mesh(
 
 
 if __name__ == "__main__":
-    generate_baby_upper_2d_mesh()
+    import sys
+
+    generate_baby_upper_2d_mesh(show_gui="--gui" in sys.argv)
