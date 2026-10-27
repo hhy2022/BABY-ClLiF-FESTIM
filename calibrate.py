@@ -1,13 +1,12 @@
-"""Calibrate the free parameters on the training runs with the surrogate.
+"""Find the parameter set that best fits the training runs, using the surrogate.
 
-Minimises the training -log posterior (likelihood.objective) inside the bounds of parameters.SPEC; the
-other parameters are taken from the start file.  The search is Nelder-Mead from the start point, then
-differential evolution seeded with that result, then Nelder-Mead again until a round improves by less
-than 0.01.  Progress is saved to a checkpoint, so an interrupted run continues where it stopped.
+The free parameters (parameters.SPEC) are adjusted to minimise the -log posterior of the training
+runs; the fixed ones are taken from the start file.  The search first goes downhill from the start
+point (Nelder-Mead), then searches the whole parameter range (differential evolution), and finally
+refines the best point found (Nelder-Mead again).  It takes about an hour on 12 cores and can be
+interrupted: running it again continues where it stopped.
 
-    python calibrate.py [--start params/paper_point.txt] [--out params/calibrated.txt]
-
-About 1 h on 12 cores.
+    python calibrate.py --start params/paper_point.txt --out params/calibrated.txt
 """
 
 import argparse

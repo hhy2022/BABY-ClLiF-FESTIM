@@ -1,15 +1,14 @@
-"""Range of each free parameter by profile likelihood, using the surrogate.
+"""How far each parameter can move while the model still fits the training runs (profile likelihood).
 
-One parameter is fixed at a value away from the calibrated point and all the others are re-optimised.
-The fixed value moves step by step in each direction until the -log posterior has risen by more than
-the threshold (admissibility_threshold.py); the edge of the range is interpolated between the last
-two steps.
+One parameter is moved step by step away from its calibrated value, and at every step all the other
+parameters are fitted again.  When the fit has become worse than the calibrated one by more than the
+threshold (admissibility_threshold.py), that side of the range ends.  This is done in both directions
+for every free parameter, using the surrogate; it takes several hours on 12 cores.
 
-    python parameter_ranges.py --params P --threshold THR --outdir D
+The ranges are printed and saved, together with every step (so an interrupted run continues) and the
+parameter set at the outer end of each range.
 
-Writes D/profile_points.jsonl (every point; an interrupted run continues from it),
-D/parameter_ranges.txt (the ranges) and D/params/<name>_lo.txt, <name>_hi.txt (the outermost point
-inside the range in each direction).  Several hours on 12 cores.
+    python parameter_ranges.py --params calibrated.txt --threshold 5.3 --outdir parameter_ranges
 """
 
 import argparse

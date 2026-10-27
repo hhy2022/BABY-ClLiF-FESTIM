@@ -1,20 +1,19 @@
-"""Range of each held-out prediction by prediction profile likelihood (Kreutz et al. 2012).
+"""How large and how small the held-out predictions can be while the model still fits the training runs
+(prediction profile likelihood, Kreutz et al. 2012).
 
-The predictions are the final cumulative IV and OV releases of the held-out runs.  For each one, the
-largest and the smallest value are searched for among parameter sets that still fit the training
-runs, i.e. whose -log posterior C stays within the threshold of its value C* at the calibrated point:
+The predictions are the final IV and OV activities of the held-out runs.  For each one, the largest
+and the smallest value are searched for among all parameter sets whose -log posterior C is within the
+threshold of its calibrated value C*:
 
-    max / min q(theta)   subject to   C(theta) <= C* + threshold
+    max / min prediction(theta)   subject to   C(theta) <= C* + threshold
 
-The constraint is added as a penalty, w * max(0, C - C* - threshold), and the problem is solved with
-Nelder-Mead.  The search starts from the profile point of parameter_ranges.py that already gives the
-most extreme value; if the result ends up slightly outside the constraint, it is moved back onto the
-boundary along the line from the start point.
+The search uses the surrogate.  It starts from the step of parameter_ranges.py that already gives the
+most extreme prediction and keeps the constraint as a penalty; a result that ends slightly outside it
+is pulled back onto the boundary.  The parameter set of each extreme is saved so that it can be run
+with FESTIM afterwards.
 
-    python prediction_ranges.py --params P --parameter-ranges D --threshold THR --out OUT
-
-Writes OUT/<case>.json, OUT/params/<case>.txt (the parameter set of each extreme, later solved with
-FESTIM) and OUT/prediction_ranges.txt.  Finished cases are kept, so an interrupted run continues.
+    python prediction_ranges.py --params calibrated.txt --parameter-ranges parameter_ranges \
+        --threshold 5.3 --out prediction_ranges
 """
 
 import argparse

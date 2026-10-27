@@ -1,13 +1,14 @@
-"""Admissibility threshold for the profile likelihood: 1.92 * chi2_red of the FESTIM fit.
+"""How much worse than the best fit a parameter set may be and still count as fitting the data.
 
-chi2 is the sum of the squared normalised residuals of the training data at the final point, with
-the same terms as the likelihood (sample increments and end values).  The OV end values of runs 1
-and 2 are left out: the model gives almost no OV release under pure He.  chi2_red = chi2 / (N - k), with k the
-number of free parameters, and 1.92 is half the 95 % quantile of chi2 with one degree of freedom.
+The threshold is 1.92 * chi2_red, where 1.92 is the usual one-parameter 95 % limit (half of 3.84)
+and chi2_red scales it to the actual scatter of the data around the FESTIM fit.  chi2_red is the sum
+of the squared normalised residuals of the training runs, divided by the number of data points minus
+the number of free parameters.  The OV end values of runs 1 and 2 are left out, because the model
+gives almost no OV release under pure He.
 
-    python admissibility_threshold.py PARAMS CHAIN
+The threshold is printed and saved next to the FESTIM chain.
 
-Prints the result and writes it to CHAIN/admissibility_threshold.txt.
+    python admissibility_threshold.py params_refit.txt festim_chain
 """
 
 import argparse
