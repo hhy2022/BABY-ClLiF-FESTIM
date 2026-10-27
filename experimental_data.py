@@ -180,3 +180,17 @@ def cyclotron_windows(run):
                 if not r.startswith("_")
             }
     return _CYC.get(run, [])
+
+
+if __name__ == "__main__":
+    # Download the data of every run (if not in data/ yet) and print what the model uses.
+    print(
+        f"{'run':>4} {'T [C]':>6} {'neutrons/s':>11} {'irr. [h]':>8} {'days':>6} {'IV [Bq]':>8} {'OV [Bq]':>8}"
+    )
+    for r in RUNS:
+        c = curves(r)
+        print(
+            f"{r:>4} {RUN_TEMP_C[r]:6.0f} {neutron_rate(r):11.3e} {irradiation_seconds(r) / 3600:8.1f} "
+            f"{t_end(r):6.1f} {c['iv'][-1]:8.2f} {c['ov'][-1]:8.2f}"
+        )
+    print(f"OpenMC TBR {openmc_tbr():.3e}")
