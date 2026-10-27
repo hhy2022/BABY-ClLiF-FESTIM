@@ -5,11 +5,17 @@ channels:
 dependencies:
   - python
   - numpy
+  - scipy
+  - requests
+  - openpyxl
+  - setuptools<81
   - pyvista
   - openmc
   - python-gmsh
   - matplotlib
-  - festim
+  - fenics-dolfinx=0.10
+  - scifem=0.20.0
+  - festim=2.2rc2
   - meshio
   - pip
   - pip:
@@ -17,4 +23,5 @@ dependencies:
     - openmc-data-downloader
     - git+https://github.com/festim-dev/openmc2dolfinx
     # - morthemes
-    - h_transport_materials
+    - h_transport_materials==0.18.1
+    - pint==0.25.3
