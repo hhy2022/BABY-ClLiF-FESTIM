@@ -184,3 +184,6 @@ cython_debug/
 *.bp
 # LIBRA run data, downloaded from the pinned URLs in experimental_data.py on first use
 data/run_*.json
+
+# results, written by run_all.sh
+figures/
