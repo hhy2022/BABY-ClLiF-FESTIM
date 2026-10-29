@@ -1,0 +1,31 @@
+# Starting point of calibrate.py, rounded from an earlier calibration.  From an arbitrary point in
+# the parameter range the search ends in a worse local optimum.
+
+# --- source
+tbr       = 0.0024                   # [-] tritium breeding ratio
+rho_1     = 1.3                      # [-] run 1 neutron-rate factor
+rho_2     = 1.0                      # [-] run 2 neutron-rate factor
+rho_3     = 0.86                     # [-] run 3 neutron-rate factor
+rho_12    = 0.99                     # [-] run 12 neutron-rate factor
+eta       = 1.2e14                   # [atoms/C] tritium per logged cyclotron charge (logged C = true C / 1440)
+
+# --- breeder side (FESTIM)
+tau_iv    = 1.3e6                    # [s] free-surface time constant V_salt / (A_free k_d)
+Bi        = 0.015                    # [-] Biot number k_d L_salt / D_salt (sets the salt diffusivity)
+lam_h2    = 5.6e-05                  # [1/s] sparge stripping rate with H2 in the gas
+lam_he    = 1.5e-06                  # [1/s] sparge stripping rate under pure He
+L_he      = 9.0e11                   # [atoms/m2/s/Pa] salt|Inconel interface conductance under He
+L_h2      = 4.3e12                   # [atoms/m2/s/Pa] salt|Inconel interface conductance at 1000 ppm H2
+
+# --- downstream holdup layer
+alpha_iv  = 0.026                    # [-] IV-line deposition fraction
+alpha_ov  = 0.99                     # [-] OV-line deposition fraction
+k_iv      = 1.1e-05                  # [1/s] IV holdup release rate at 1000 ppm H2
+k_ov      = 1.6e-07                  # [1/s] OV holdup release rate at 1000 ppm H2
+k_ov_he   = 1e-09                    # [1/s] OV holdup release rate under He
+k_iv_he   = 1e-09                    # [1/s] IV holdup release rate under He (refitted on FESTIM only)
+
+# --- fixed
+rho_4     = 1.0                      # [-] run 4 neutron-rate factor
+rho_6     = 1.0                      # [-] run 6 neutron-rate factor
+
