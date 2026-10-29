@@ -187,3 +187,12 @@ data/run_*.json
 
 # results, written by run_all.sh
 figures/
+
+# model output and figures
+*.csv
+*.png
+*.pdf
+*.jpg
+*.npz
+*.npy
+*.jsonl
