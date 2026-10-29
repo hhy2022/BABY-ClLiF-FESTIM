@@ -9,7 +9,6 @@ import experimental_data
 import surrogate
 
 ROOT = experimental_data.ROOT
-DEFAULT = os.path.join(ROOT, "params", "final.txt")
 
 
 def rel(path):
@@ -55,7 +54,7 @@ GROUPS = (
 )
 
 
-def read_params(path=DEFAULT):
+def read_params(path):
     th = {}
     with open(path) as f:
         for line in f:

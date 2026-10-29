@@ -6,7 +6,7 @@ point (Nelder-Mead), then searches the whole parameter range (differential evolu
 refines the best point found (Nelder-Mead again).  It takes about an hour on 12 cores and can be
 interrupted: running it again continues where it stopped.
 
-    python calibrate.py --start params/paper_point.txt --out params/calibrated.txt
+    python calibrate.py --start params/start.txt --out calibrated.txt
 """
 
 import argparse
@@ -29,11 +29,11 @@ import parameters
 
 ap = argparse.ArgumentParser()
 ap.add_argument(
-    "--start", default=os.path.join(parameters.ROOT, "params", "paper_point.txt")
+    "--start",
+    default=os.path.join(parameters.ROOT, "params", "start.txt"),
+    help="starting point; the fixed parameters are taken from it too",
 )
-ap.add_argument(
-    "--out", default=os.path.join(parameters.ROOT, "params", "calibrated.txt")
-)
+ap.add_argument("--out", required=True)
 ap.add_argument("--workers", type=int, default=12)
 ap.add_argument("--generations", type=int, default=40)
 ap.add_argument(

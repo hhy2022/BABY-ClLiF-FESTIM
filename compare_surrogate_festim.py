@@ -18,7 +18,7 @@ import likelihood
 import parameters
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--params", default=parameters.DEFAULT, help="parameter file")
+ap.add_argument("--params", required=True, help="parameter file")
 ap.add_argument(
     "--chain", required=True, help="FESTIM chain folder at the same parameters"
 )

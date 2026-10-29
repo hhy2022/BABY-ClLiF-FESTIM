@@ -1,339 +1,154 @@
 """2-D axisymmetric (r, z) mesh of the BABY-1L vessel: ClLiF melt (group 3) in Inconel 625 (group 1).
 
     python baby_mesh.py [--gui]      -> baby_2d.msh
+
 The boundary groups (11-33, 99) are the ID_* constants of baby_festim.py.
 """
+
+import sys
+
 import gmsh
 
 import experimental_data
 
+CM = 1e-2
 
-def generate_baby_upper_2d_mesh(
-    fname="baby_2d.msh",
-    show_gui=False,
-    mesh_size=0.001,
-):
+
+def generate_mesh(fname="baby_2d.msh", show_gui=False, mesh_size=0.001):
     gmsh.initialize()
-    gmsh.model.add("BABY_upper_2D_OpenMC_based")
+    gmsh.model.add("BABY_2D")
     occ = gmsh.model.occ
-    # =========================================================
-    # Unit conversion
-    # =========================================================
-    cm = 1e-2
 
-    # =========================================================
-    # Radial dimensions [m]
-    # =========================================================
+    # radii [m]
     r_axis = 0.0
     r_heater = experimental_data.R_HEATER
     r_cllif = experimental_data.R_CLLIF
     r_inconel = experimental_data.R_INCONEL
 
-    # =========================================================
-    # Axial thicknesses [m]
-    # =========================================================
-    t_base = 0.786 * cm
-    t_alumina = 0.635 * cm
-    t_he = 0.600 * cm
-    t_inconel = experimental_data.T_BOTTOM
-    t_heater_gap = experimental_data.T_HEATER_GAP
-    t_cllif = experimental_data.T_CLLIF
-    t_gap = experimental_data.T_GAP
-    t_cap = experimental_data.T_CAP
-    # =========================================================
-    # Axial coordinates [m]
-    # =========================================================
-    y0 = 0.0
-    y1 = y0 + t_base
-    y2 = y1 + t_alumina
-    y3 = y2 + t_he
-    y4 = y3 + t_inconel
-    y5 = y4 + t_cllif
-    y6 = y5 + t_gap
-    y7 = y6 + t_cap
+    # heights [m], from the bottom of the base plate up; the base, alumina and He layers below the
+    # vessel are not meshed, they only set the z origin
+    y_inconel_bottom = (0.786 + 0.635 + 0.600) * CM
+    y_cllif_bottom = y_inconel_bottom + experimental_data.T_BOTTOM
+    y_cllif_top = y_cllif_bottom + experimental_data.T_CLLIF
+    y_gap_top = y_cllif_top + experimental_data.T_GAP
+    y_cap_top = y_gap_top + experimental_data.T_CAP
+    y_heater_bottom = y_cllif_bottom + experimental_data.T_HEATER_GAP
 
-    y_he_top = y3
-    y_inconel_top = y4
-    y_cllif_bottom = y4
-    y_cllif_top = y5
-    y_gap_top = y6
-    y_IV_top = y7
-
-    y_heater_bottom = y4 + t_heater_gap
-    # y_heater_top = y7  # heater ends at cap top
-
-    # =========================================================
-    # Create base surfaces
-    # =========================================================
-    surfaces = {}
-
-    surfaces["IV_bottom"] = occ.addRectangle(r_axis, y_he_top, 0, r_inconel, t_inconel)
-
-    # surfaces["heater"] = occ.addRectangle(
-    #     r_axis, y_heater_bottom, 0, r_heater, y_heater_top - y_heater_bottom
-    # )
-
-    surfaces["cllif_lower"] = occ.addRectangle(
+    # the vessel bottom, wall and cap, and the melt below and around the heater well
+    bottom = occ.addRectangle(
+        r_axis, y_inconel_bottom, 0, r_inconel, experimental_data.T_BOTTOM
+    )
+    melt_lower = occ.addRectangle(
         r_axis, y_cllif_bottom, 0, r_cllif, y_heater_bottom - y_cllif_bottom
     )
-
-    surfaces["cllif_upper"] = occ.addRectangle(
+    melt_upper = occ.addRectangle(
         r_heater, y_heater_bottom, 0, r_cllif - r_heater, y_cllif_top - y_heater_bottom
     )
-
-    surfaces["IV_wall"] = occ.addRectangle(
-        r_cllif, y_inconel_top, 0, r_inconel - r_cllif, y_gap_top - y_inconel_top
+    wall = occ.addRectangle(
+        r_cllif, y_cllif_bottom, 0, r_inconel - r_cllif, y_gap_top - y_cllif_bottom
     )
-
-    surfaces["IV_top"] = occ.addRectangle(
-        r_heater, y_gap_top, 0, r_inconel - r_heater, t_cap
-    )
-
-    # surfaces["helium_box"] = occ.addRectangle(
-    #     r_heater, y_cllif_top, 0, r_cllif - r_heater, y_gap_top - y_cllif_top
-    # )
-
-    occ.synchronize()
-
-    # Merge the two CLLiF rectangles into one surface so the salt has no
-    # internal seam line. They are only split because of the heater-well notch;
-    # physically it is a single domain. NOTE: removing the seam drops two curves,
-    # which shifts some OCC curve tags — the hardcoded boundary tags below were
-    # remapped accordingly (verify with: python baby_mesh.py after edits).
-    fused_cllif, _ = occ.fuse(
-        [(2, surfaces["cllif_lower"])], [(2, surfaces["cllif_upper"])]
+    cap = occ.addRectangle(
+        r_heater, y_gap_top, 0, r_inconel - r_heater, experimental_data.T_CAP
     )
     occ.synchronize()
 
-    all_objects = [
-        (2, surfaces["IV_bottom"]),
-        (2, surfaces["IV_wall"]),
-        (2, surfaces["IV_top"]),
-        # (2, surfaces["heater"]),
-        # (2, surfaces["helium_box"]),
-    ] + [(2, tag) for (dim, tag) in fused_cllif]
-    occ.fragment(all_objects, [])
+    # The melt is one domain; it is drawn as two rectangles only because of the heater-well notch.
+    # Fusing them changes the curve tags, and the boundary tags below are the ones after the fuse.
+    melt, _ = occ.fuse([(2, melt_lower)], [(2, melt_upper)])
+    occ.synchronize()
+    occ.fragment([(2, bottom), (2, wall), (2, cap)] + melt, [])
     occ.synchronize()
 
-    # =========================================================
-    # Reclassify surfaces
-    # =========================================================
-    physical_surfaces = {
-        "inconel625": [],
-        # "helium": [],
-        "cllif_natural": [],
-        # "heater": [],
-    }
-
+    # sort the surfaces into melt and Inconel by their centre of mass
     tol = 1e-8
 
-    def in_range(value, lower, upper):
-        return (lower - tol) <= value <= (upper + tol)
+    def inside(v, lo, hi):
+        return lo - tol <= v <= hi + tol
 
+    def is_melt(r, z):
+        return (
+            inside(z, y_cllif_bottom, y_heater_bottom) and inside(r, r_axis, r_cllif)
+        ) or (inside(z, y_heater_bottom, y_cllif_top) and inside(r, r_heater, r_cllif))
+
+    def is_inconel(r, z):
+        return (
+            (
+                inside(z, y_inconel_bottom, y_cllif_bottom)
+                and inside(r, r_axis, r_inconel)
+            )
+            or (inside(r, r_cllif, r_inconel) and inside(z, y_cllif_bottom, y_gap_top))
+            or (inside(z, y_gap_top, y_cap_top) and inside(r, r_heater, r_inconel))
+        )
+
+    inconel, cllif = [], []
     for dim, tag in gmsh.model.getEntities(2):
-        xc, yc, _ = occ.getCenterOfMass(dim, tag)
+        r, z, _ = occ.getCenterOfMass(dim, tag)
+        if is_melt(r, z):
+            cllif.append(tag)
+        elif is_inconel(r, z):
+            inconel.append(tag)
 
-        # Heater
-        # if in_range(xc, r_axis, r_heater) and in_range(
-        #     yc, y_heater_bottom, y_heater_top
-        # ):
-        #     physical_surfaces["heater"].append(tag)
-        #     continue
+    gmsh.model.addPhysicalGroup(2, inconel, 1)
+    gmsh.model.setPhysicalName(2, 1, "inconel625")
+    gmsh.model.addPhysicalGroup(2, cllif, 3)
+    gmsh.model.setPhysicalName(2, 3, "cllif_natural")
+    gmsh.model.setColor([(2, t) for t in inconel], 100, 149, 237)
+    gmsh.model.setColor([(2, t) for t in cllif], 255, 180, 50)
 
-        # CLLiF lower
-        if in_range(yc, y_cllif_bottom, y_heater_bottom) and in_range(
-            xc, r_axis, r_cllif
-        ):
-            physical_surfaces["cllif_natural"].append(tag)
-            continue
+    # boundary groups: name, curve tags, group id
+    for name, curves, gid in (
+        ("inconel_outer_bottom", [1], 31),
+        ("inconel_outer_side", [2, 6], 32),
+        ("inconel_outer_top", [11, 12], 33),
+        ("left_symmetry_liquid", [17], 21),
+        ("left_symmetry_inconel", [5], 22),
+        ("top_cap_bc", [10], 11),
+        ("gap_sidewall_bc", [8], 12),
+        ("liquid_surface_bc", [14], 13),
+        ("heater_cap_bc", [13], 14),
+        ("liquid_heater_interface_bc", [16, 15], 16),
+    ):
+        gmsh.model.addPhysicalGroup(1, curves, tag=gid)
+        gmsh.model.setPhysicalName(1, gid, name)
 
-        # CLLiF upper
-        if in_range(yc, y_heater_bottom, y_cllif_top) and in_range(
-            xc, r_heater, r_cllif
-        ):
-            physical_surfaces["cllif_natural"].append(tag)
-            continue
-
-        # Inconel bottom
-        if in_range(yc, y_he_top, y_inconel_top) and in_range(xc, r_axis, r_inconel):
-            physical_surfaces["inconel625"].append(tag)
-            continue
-
-        # Inconel wall
-        if in_range(xc, r_cllif, r_inconel) and in_range(yc, y_inconel_top, y_gap_top):
-            physical_surfaces["inconel625"].append(tag)
-            continue
-
-        # Inconel top
-        if in_range(yc, y_gap_top, y_IV_top) and in_range(xc, r_heater, r_inconel):
-            physical_surfaces["inconel625"].append(tag)
-            continue
-
-        # # Helium
-        # if in_range(yc, y_cllif_top, y_gap_top) and in_range(xc, r_heater, r_cllif):
-        #     physical_surfaces["helium"].append(tag)
-        #     continue
-
-    # Remove duplicates
-    for key, tags in physical_surfaces.items():
-        seen = set()
-        deduped = []
-        for tag in tags:
-            if tag not in seen:
-                seen.add(tag)
-                deduped.append(tag)
-        physical_surfaces[key] = deduped
-
-    # =========================================================
-    # Physical groups
-    # =========================================================
-    physical_ids = {
-        "inconel625": 1,
-        # "helium": 2,
-        "cllif_natural": 3,
-        # "heater": 4,
-    }
-
-    for name, group_id in physical_ids.items():
-        tags = physical_surfaces[name]
-        if tags:
-            gmsh.model.addPhysicalGroup(2, tags, group_id)
-            gmsh.model.setPhysicalName(2, group_id, name)
-
-    # Color volume regions
-    # inconel625 -> steel blue
-    for tag in physical_surfaces["inconel625"]:
-        gmsh.model.setColor([(2, tag)], 100, 149, 237)
-
-    # cllif_natural -> amber
-    for tag in physical_surfaces["cllif_natural"]:
-        gmsh.model.setColor([(2, tag)], 255, 180, 50)
-
-    # =========================================================
-    # Boundary groups
-    # =========================================================
-    # outside_inconel = gmsh.model.addPhysicalGroup(1, [1, 2, 6, 12, 13], tag=10)
-    # gmsh.model.setPhysicalName(1, outside_inconel, "outside_inconel")
-
-    inconel_outer_bottom = gmsh.model.addPhysicalGroup(1, [1], tag=31)
-    gmsh.model.setPhysicalName(1, inconel_outer_bottom, "inconel_outer_bottom")
-    inconel_outer_side = gmsh.model.addPhysicalGroup(1, [2, 6], tag=32)
-    gmsh.model.setPhysicalName(1, inconel_outer_side, "inconel_outer_side")
-    inconel_outer_top = gmsh.model.addPhysicalGroup(1, [11, 12], tag=33)
-    gmsh.model.setPhysicalName(1, inconel_outer_top, "inconel_outer_top")
-
-    left_symmetry_liquid = gmsh.model.addPhysicalGroup(1, [17], tag=21)
-    gmsh.model.setPhysicalName(1, left_symmetry_liquid, "left_symmetry_liquid")
-
-    left_symmetry_inconel = gmsh.model.addPhysicalGroup(1, [5], tag=22)
-    gmsh.model.setPhysicalName(1, left_symmetry_inconel, "left_symmetry_inconel")
-
-    top_cap_bc = gmsh.model.addPhysicalGroup(1, [10], tag=11)
-    gmsh.model.setPhysicalName(1, top_cap_bc, "top_cap_bc")
-
-    gap_sidewall_bc = gmsh.model.addPhysicalGroup(1, [8], tag=12)
-    gmsh.model.setPhysicalName(1, gap_sidewall_bc, "gap_sidewall_bc")
-
-    liquid_surface_bc = gmsh.model.addPhysicalGroup(1, [14], tag=13)
-    gmsh.model.setPhysicalName(1, liquid_surface_bc, "liquid_surface_bc")
-
-    heater_cap_bc = gmsh.model.addPhysicalGroup(1, [13], tag=14)
-    gmsh.model.setPhysicalName(1, heater_cap_bc, "heater_cap_bc")
-
-    # heater_gap_bc = gmsh.model.addPhysicalGroup(1, [20], tag=15)
-    # gmsh.model.setPhysicalName(1, heater_gap_bc, "heater_gap_bc")
-
-    liquid_heater_interface_bc = gmsh.model.addPhysicalGroup(1, [16, 15], tag=16)
-    gmsh.model.setPhysicalName(
-        1, liquid_heater_interface_bc, "liquid_heater_interface_bc"
-    )
-
-    boundary_liquid = set(
-        gmsh.model.getBoundary(
-            [(2, tag) for tag in physical_surfaces["cllif_natural"]],
-            oriented=False,
-            recursive=False,
+    def boundary(tags):
+        return set(
+            gmsh.model.getBoundary(
+                [(2, t) for t in tags], oriented=False, recursive=False
+            )
         )
-    )
-    boundary_inconel = set(
-        gmsh.model.getBoundary(
-            [(2, tag) for tag in physical_surfaces["inconel625"]],
-            oriented=False,
-            recursive=False,
-        )
-    )
-    # boundary_heater = set(
-    #     gmsh.model.getBoundary(
-    #         [(2, tag) for tag in physical_surfaces["heater"]],
-    #         oriented=False,
-    #         recursive=False,
-    #     )
-    # )
 
-    liquid_inconel_interface_curve = list(
-        boundary_liquid.intersection(boundary_inconel)
-    )
-    # liquid_heater_interface_curve = list(boundary_liquid.intersection(boundary_heater))
+    interface = [c[1] for c in boundary(cllif) & boundary(inconel)]
+    gmsh.model.addPhysicalGroup(1, interface, tag=99)
+    gmsh.model.setPhysicalName(1, 99, "liquid_inconel_interface")
+    occ.synchronize()
 
-    curve_tags_1 = [c[1] for c in liquid_inconel_interface_curve]
-    # curve_tags_2 = [c[1] for c in liquid_heater_interface_curve]
-
-    liquid_inconel_interface = gmsh.model.addPhysicalGroup(1, curve_tags_1, tag=99)
-    gmsh.model.setPhysicalName(1, liquid_inconel_interface, "liquid_inconel_interface")
-
-    # liquid_heater_interface = gmsh.model.addPhysicalGroup(1, curve_tags_2, tag=100)
-    # gmsh.model.setPhysicalName(1, liquid_heater_interface, "liquid_heater_interface")
-    gmsh.model.occ.synchronize()
-
-    # =========================================================
-    # Mesh
-    # =========================================================
+    # element size: mesh_size, five times finer near the melt|Inconel interface and the free surface
+    field = gmsh.model.mesh.field
     gmsh.model.mesh.setSize(gmsh.model.getEntities(0), mesh_size)
+    refine = []
+    for curves in (interface, [14]):
+        dist = field.add("Distance")
+        field.setNumbers(dist, "CurvesList", curves)
+        thr = field.add("Threshold")
+        field.setNumber(thr, "InField", dist)
+        field.setNumber(thr, "SizeMin", mesh_size / 5)
+        field.setNumber(thr, "SizeMax", mesh_size)
+        field.setNumber(thr, "DistMin", 0.002)
+        field.setNumber(thr, "DistMax", 0.006)
+        refine.append(thr)
+    finest = field.add("Min")
+    field.setNumbers(finest, "FieldsList", refine)
+    field.setAsBackgroundMesh(finest)
 
-    # Refine mesh near the CLLiF/Inconel interface
-    f_dist_iface = gmsh.model.mesh.field.add("Distance")
-    gmsh.model.mesh.field.setNumbers(f_dist_iface, "CurvesList", curve_tags_1)
-
-    f_thresh_iface = gmsh.model.mesh.field.add("Threshold")
-    gmsh.model.mesh.field.setNumber(f_thresh_iface, "InField", f_dist_iface)
-    gmsh.model.mesh.field.setNumber(f_thresh_iface, "SizeMin", mesh_size / 5)
-    gmsh.model.mesh.field.setNumber(f_thresh_iface, "SizeMax", mesh_size)
-    gmsh.model.mesh.field.setNumber(f_thresh_iface, "DistMin", 0.002)
-    gmsh.model.mesh.field.setNumber(f_thresh_iface, "DistMax", 0.006)
-
-    # Refine mesh near the liquid surface
-    f_dist_liquid = gmsh.model.mesh.field.add("Distance")
-    gmsh.model.mesh.field.setNumbers(f_dist_liquid, "CurvesList", [14])
-
-    f_thresh_liquid = gmsh.model.mesh.field.add("Threshold")
-    gmsh.model.mesh.field.setNumber(f_thresh_liquid, "InField", f_dist_liquid)
-    gmsh.model.mesh.field.setNumber(f_thresh_liquid, "SizeMin", mesh_size / 5)
-    gmsh.model.mesh.field.setNumber(f_thresh_liquid, "SizeMax", mesh_size)
-    gmsh.model.mesh.field.setNumber(f_thresh_liquid, "DistMin", 0.002)
-    gmsh.model.mesh.field.setNumber(f_thresh_liquid, "DistMax", 0.006)
-
-    # Use the finest size requested by either refinement field
-    f_min = gmsh.model.mesh.field.add("Min")
-    gmsh.model.mesh.field.setNumbers(
-        f_min,
-        "FieldsList",
-        [f_thresh_iface, f_thresh_liquid],
-    )
-
-    gmsh.model.mesh.field.setAsBackgroundMesh(f_min)
     gmsh.model.mesh.generate(2)
     gmsh.write(fname)
-
     if show_gui:
-        # Hide point markers (geometry vertices and mesh nodes) in the GUI.
         gmsh.option.setNumber("Geometry.Points", 0)
         gmsh.option.setNumber("Mesh.Points", 0)
         gmsh.fltk.run()
-
     gmsh.finalize()
 
 
 if __name__ == "__main__":
-    import sys
-
-    generate_baby_upper_2d_mesh(show_gui="--gui" in sys.argv)
+    generate_mesh(show_gui="--gui" in sys.argv)

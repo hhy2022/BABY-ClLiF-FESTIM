@@ -11,7 +11,7 @@
 # left off.
 #
 # Optional settings: CORES (default 12), START_PARAMS (starting point of the calibration, default
-# params/paper_point.txt) and FIG_DIR (output folder, default figures).
+# params/start.txt) and FIG_DIR (output folder, default figures).
 set -e
 cd "$(dirname "$0")"
 export BABY_PY=${BABY_PY:-python}
@@ -19,7 +19,7 @@ PY=$BABY_PY
 CORES=${CORES:-12}
 FIG=${FIG_DIR:-figures}
 W=$FIG/model_output
-START=${START_PARAMS:-params/paper_point.txt}
+START=${START_PARAMS:-params/start.txt}
 CAL=$W/calibrated_surrogate.txt
 NO_CYC=$W/calibrated_surrogate_no_cyclotron.txt
 mkdir -p "$W"

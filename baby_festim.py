@@ -5,18 +5,19 @@ Two materials on the (r, z) mesh of baby_mesh.py, one mobile species (tritium):
                source over the irradiation windows and the logged cyclotron beam windows;
                free surface:  J = k_d c                                       -> IV
                sparging:      volumetric sink lambda(t) c                     -> IV
-  interface    J = L(x) [c_s / K_H - (c_m / K_S)^2],  L(x) = L_He + (L_1000 - L_He) x / 1000 ppm
+  interface    J = L(x) [c_s / K_H - (c_m / K_S)^2],  L(x) = L_He + (L_H2 - L_He) x / 1000 ppm
   Inconel 625  diffusion and Sieverts solubility (Gervasini);
                outer faces:   T + T -> T2 and T + H -> HT, J = 2 K_r c^2 + K_r c_H c   (Perujo) -> OV
                inner faces above the melt: no flux.
-x is the H2 fraction of the sweep gas and c_H = K_S sqrt(p_H2) the hydrogen dissolved at the outer faces.
+x is the H2 fraction of the sweep gas, so L_He is the value under pure He and L_H2 the value at
+1000 ppm H2 (0.1 %).  c_H = K_S sqrt(p_H2) is the hydrogen dissolved at the outer faces.
 
 The runs are solved in campaign order (1 -> 2 -> 3 -> 4 -> 6 -> 12); the tritium left in the salt and in
 the wall at the end of a run is the uniform initial concentration of the next, and run 12 starts clean.
 The numbers come from a parameter file (parameters.py); the downstream holdup layer is applied to the
 exported fluxes afterwards (chain.py).
 
-    python baby_festim.py [--params params/final.txt] [--out figures/model_output/festim]
+    python baby_festim.py --params PARAMS --out FOLDER
                           [--runs 1,2,3,4,6,12] [--dt-max-fast 300]
 
 Tested with FESTIM 2.2.0-rc.2 and with FESTIM's main branch of 2026-10-16 (identical results), DOLFINx 0.10,
@@ -373,14 +374,8 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser(
         description="BABY-1L FESTIM model, runs solved in campaign order"
     )
-    ap.add_argument(
-        "--params",
-        default=parameters.DEFAULT,
-        help="parameter file (default params/final.txt)",
-    )
-    ap.add_argument(
-        "--out", default=os.path.join(ROOT, "figures", "model_output", "festim")
-    )
+    ap.add_argument("--params", required=True, help="parameter file")
+    ap.add_argument("--out", required=True, help="output folder, one subfolder per run")
     ap.add_argument("--runs", default=",".join(map(str, experimental_data.RUNS)))
     ap.add_argument(
         "--dt-max-fast",

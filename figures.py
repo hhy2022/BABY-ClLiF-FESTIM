@@ -1463,7 +1463,7 @@ LABELS = {
     "lam_h2": "$\\lambda_{\\mathrm{H}_2}$ [1/s]",
     "lam_he": "$\\lambda_\\mathrm{He}$ [1/s]",
     "L_he": "$L_\\mathrm{He}$ [m$^{-2}$s$^{-1}$Pa$^{-1}$]",
-    "L_h2": "$L_{1000}$ [m$^{-2}$s$^{-1}$Pa$^{-1}$]",
+    "L_h2": "$L_{\\mathrm{H}_2}$ [m$^{-2}$s$^{-1}$Pa$^{-1}$]",
     "alpha_iv": "$\\alpha_\\mathrm{IV}$",
     "alpha_ov": "$\\alpha_\\mathrm{OV}$",
     "k_iv": "$k_\\mathrm{IV}$ [1/s]",
