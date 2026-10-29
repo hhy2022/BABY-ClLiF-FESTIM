@@ -30,17 +30,39 @@ conda activate baby-tritium-transport-env
 BABY_PY=$(which python) ./run_all.sh
 ```
 
-`run_all.sh` reproduces all results, from downloading the data to the figures. A full run takes one
-to two days on 12 cores; if it is stopped, running it again continues where it left off.
+`run_all.sh` produces all results, from downloading the data to the figures; none are stored in the
+repository. A full run takes one to two days on 12 cores; if it is stopped, running it again continues
+where it left off. The number of cores and the output folder can be changed with `CORES` and
+`FIG_DIR` (default `figures`), e.g. `CORES=8 FIG_DIR=my_figures BABY_PY=$(which python) ./run_all.sh`.
 
-To solve the model at one parameter set instead (a few hours):
+To calibrate and solve the model once, without the uncertainty ranges (a few hours), run from the
+repository folder:
 
 ```bash
-python experimental_data.py                                   # download the run data into data/
-python baby_mesh.py                                           # build the mesh, baby_2d.msh
-python baby_festim.py --params params/final.txt --out my_chain
-python downstream.py params/final.txt my_chain                # holdup layer and comparison with the data
+python experimental_data.py                                  # download the run data into data/
+python baby_mesh.py                                          # build the mesh, baby_2d.msh
+python calibrate.py --out my_run/calibrated.txt              # about 1 h
+python baby_festim.py --params my_run/calibrated.txt --out my_run/festim
+python downstream.py my_run/calibrated.txt my_run/festim     # holdup layer and comparison with the data
 ```
+
+## Where things are written
+
+The run data and the mesh are written next to the code (`data/run_*.json`, `baby_2d.msh`) and are reused
+by every later step. Everything else goes into `figures/` (or `FIG_DIR`):
+
+| path | content |
+|---|---|
+| `figures/fig*.png`, `.pdf` | the figures |
+| `figures/summary.txt` | fit to the data, parameter ranges and held-out predictions |
+| `figures/model_output/run_all.log` | progress of `run_all.sh` |
+| `figures/model_output/calibrated_surrogate.txt` | the calibrated parameters (surrogate) |
+| `figures/model_output/festim/` | FESTIM at the calibrated point: one folder per run with the release and inventory CSVs, `recovery_run*.csv` (model against measured), `params_refit.txt` (the final parameters, holdup refitted on FESTIM) and `admissibility_threshold.txt` |
+| `figures/model_output/festim_no_cyclotron_run3/`, `figures/model_output/festim_no_cyclotron_run4/` | the same with the cyclotron source off (run 3, and run 4), for figures 3 and 4 |
+| `figures/model_output/festim_vs_data.txt` | FESTIM against the measurements, run by run (output of `downstream.py`) |
+| `figures/model_output/compare_surrogate_festim.txt` | surrogate against FESTIM, run by run |
+| `figures/model_output/parameter_ranges/` | `parameter_ranges.txt`, every profile point, and the parameter set at each end of each range |
+| `figures/model_output/prediction_ranges/` | `prediction_ranges.txt`, the parameter sets at the ends of each held-out range (`params/`) and their FESTIM solutions (`festim/`) |
 
 ## How it works
 
@@ -69,7 +91,7 @@ The workflow in `run_all.sh`:
 | range of each held-out prediction (prediction profile likelihood); the extremes are then solved with FESTIM | `prediction_ranges.py` | ~1 h + FESTIM |
 | figures and summary table | `figures.py`, `summary.py` | minutes |
 
-The figures are written to `figures/`, with everything they are made from in `figures/model_output/`:
+The figures:
 
 | figure | content |
 |---|---|
@@ -106,5 +128,5 @@ extremes over all such sets.
 | `chain.py` | the campaign chain: FESTIM or surrogate release, then the downstream holdup layer |
 | `festim_output.py` | reads the output of a FESTIM run |
 | `likelihood.py` | likelihood, priors and the calibration objective |
-| `params/` | `final.txt`, the final calibration; `paper_point.txt`, an earlier one used as the starting point of `calibrate.py` |
-| `data/` | cyclotron beam windows (`cyc_windows.json`, made by `logbook_photos/extracted/build_cyc_windows.py`) and the measured neutron rates of runs 4 and 12 (`measured_neutron_rates.json`, from LIBRA pull requests not merged yet); the downloaded run data are cached here |
+| `params/start.txt` | the starting point of `calibrate.py`, rounded from an earlier calibration; from an arbitrary point in the parameter range the search ends in a worse local optimum |
+| `data/` | `cyc_windows.json`, the cyclotron beam windows of each run, from the cyclotron log and the run logbooks; `measured_neutron_rates.json`, the measured neutron rates of runs 4 and 12, from LIBRA pull requests not merged yet. The run data downloaded from LIBRA are cached here too. |
