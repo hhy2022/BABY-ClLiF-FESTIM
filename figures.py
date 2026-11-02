@@ -3,7 +3,7 @@ downstream holdup layer.
 
   fig1_geometry          the vessel, the sweep streams and the two tritium pathways
   fig2_mechanism         the model: breeder side (2-D FESTIM), downstream holdup layer, counting
-  fig3_training          the training runs against the measurements
+  fig3_training          the training runs against the measurements, with the spread of the Fig. 4 sets
   fig4_prediction        the held-out runs, with the range of the prediction
   fig5_inventory         where the tritium is during the campaign, run by run
   fig6_pathways_run3     the tritium collected in run 3, split by where it comes from
@@ -801,10 +801,15 @@ def fig3_training():
     for i, (tag, r) in enumerate(
         (("(a) Run 1", 1), ("(b) Run 2", 2), ("(c) Run 3", 3), ("(d) Run 12", 12))
     ):
-        run_panel(g[i // 2, i % 2], tag, r, band=False)
+        run_panel(g[i // 2, i % 2], tag, r, band=True)
+    # spread of the admissible parameter sets behind the held-out ranges of Fig. 4
     legend(
         fig,
-        (
+        [
+            (Patch(color=IVC, alpha=0.16), "IV, admissible parameter sets"),
+            (Patch(color=OVC, alpha=0.16), "OV, admissible parameter sets"),
+        ]
+        + (
             [
                 (Line2D([], [], **LN_IV_DASH), "IV, no cyclotron"),
                 (Line2D([], [], **LN_OV_DASH), "OV, no cyclotron"),
