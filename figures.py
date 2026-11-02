@@ -51,14 +51,36 @@ W = os.path.join(FIG, "model_output")
 BQ = experimental_data.BQ_PER_ATOM
 
 # ------------------------------------------------------------------ shared style
-FS_TICK, FS_LABEL, FS_TAG, FS_LEG, FS_SW = 13, 14, 13, 13, 12
-plt.rcParams.update({"xtick.labelsize": FS_TICK, "ytick.labelsize": FS_TICK})
+# sizes in points at print size: two-column figures are 7.0 in wide, one-column figures 3.5 in
+TEXT_W, COL_W = 7.0, 3.5
+FS_TICK, FS_LABEL, FS_TAG, FS_LEG, FS_SW = 7.5, 8.5, 8.5, 8, 8.5
+plt.rcParams.update(
+    {
+        "font.size": FS_LABEL,
+        "xtick.labelsize": FS_TICK,
+        "ytick.labelsize": FS_TICK,
+        "axes.linewidth": 0.7,
+        "xtick.major.width": 0.7,
+        "ytick.major.width": 0.7,
+        "xtick.minor.width": 0.5,
+        "ytick.minor.width": 0.5,
+        "xtick.major.size": 3.0,
+        "ytick.major.size": 3.0,
+        "xtick.minor.size": 1.8,
+        "ytick.minor.size": 1.8,
+        "axes.titlepad": 4.0,
+        "axes.labelpad": 3.0,
+        "lines.linewidth": 1.3,
+        "grid.linewidth": 0.5,
+        "legend.handlelength": 2.0,
+    }
+)
 IVC, OVC, IRR, SWC, CYC = "#1B9E77", "#D9601F", "#E8709A", "#8A8A8A", "#7B6FB0"
-MK_IV = dict(marker="o", ms=6.5, mfc=IVC, mec=IVC, color=IVC, ls="none")
-MK_OV = dict(marker="o", ms=6.5, mfc="white", mec=OVC, mew=1.7, color=OVC, ls="none")
-LN_IV, LN_OV = dict(color=IVC, lw=2.2), dict(color=OVC, lw=2.2)
-LN_IV_DASH, LN_OV_DASH = dict(color=IVC, lw=1.8, ls=(0, (4, 2.5))), dict(
-    color=OVC, lw=1.8, ls=(0, (4, 2.5))
+MK_IV = dict(marker="o", ms=3.8, mfc=IVC, mec=IVC, color=IVC, ls="none")
+MK_OV = dict(marker="o", ms=3.8, mfc="white", mec=OVC, mew=1.0, color=OVC, ls="none")
+LN_IV, LN_OV = dict(color=IVC, lw=1.4), dict(color=OVC, lw=1.4)
+LN_IV_DASH, LN_OV_DASH = dict(color=IVC, lw=1.1, ls=(0, (3.5, 2))), dict(
+    color=OVC, lw=1.1, ls=(0, (3.5, 2))
 )
 GAS_TEXT = {
     1: (None, "He, no sparger"),
@@ -72,7 +94,7 @@ GAS_TEXT = {
 
 def save(fig, name):
     for ext in ("png", "pdf"):
-        fig.savefig(os.path.join(FIG, f"{name}.{ext}"), dpi=200, bbox_inches="tight")
+        fig.savefig(os.path.join(FIG, f"{name}.{ext}"), dpi=300, bbox_inches="tight")
     plt.close(fig)
     print(f"wrote {parameters.rel(os.path.join(FIG, name))}.png/.pdf")
 
@@ -105,9 +127,9 @@ def decorate(ax, run, top):
     if sw is not None:
         xmax = ax.get_xlim()[1]
         right = sw < 0.6 * xmax
-        ax.axvline(sw, color=SWC, ls=(0, (5, 4)), lw=1.4, zorder=1)
+        ax.axvline(sw, color=SWC, ls=(0, (4, 3)), lw=0.9, zorder=1)
         ax.text(
-            sw + (0.012 if right else -0.012) * xmax,
+            sw + (0.015 if right else -0.022) * xmax,
             0.965,
             sw_label,
             transform=ax.get_xaxis_transform(),
@@ -147,12 +169,15 @@ def legend(fig, extra, ncol=4):
         ncol=ncol,
         loc="upper center",
         bbox_to_anchor=(0.5, 0.995),
-        columnspacing=2.0,
-        handlelength=2.2,
+        columnspacing=1.4,
+        handlelength=2.0,
+        handletextpad=0.5,
+        borderpad=0.4,
         frameon=True,
         fancybox=False,
         edgecolor="#BDBDBD",
         framealpha=1.0,
+        borderaxespad=0.2,
     )
 
 
@@ -205,6 +230,7 @@ def fig1_geometry():
     zct = zgt + experimental_data.T_CAP / cm  # top of the cap
     OVX, OVB, OVT = 9.2, -2.0, 13.8
     fig, ax = plt.subplots(figsize=(10.6, 10.9))
+    pt = 10.6 / COL_W  # drawn at 10.6 in, printed one column wide: font sizes as printed
 
     def arrow(x0, z0, x1, z1, color, lw=2.2, ms=16, z=8):
         ax.add_patch(
@@ -290,7 +316,7 @@ def fig1_geometry():
         -3.6,
         3.4,
         "ClLiF salt",
-        fontsize=27,
+        fontsize=10.5 * pt,
         fontweight="bold",
         ha="center",
         va="center",
@@ -301,7 +327,7 @@ def fig1_geometry():
         -7.70,
         7.6,
         "Inconel-625",
-        fontsize=17,
+        fontsize=7.5 * pt,
         rotation=90,
         ha="center",
         va="center",
@@ -312,7 +338,7 @@ def fig1_geometry():
         0.0,
         8.0,
         "heater",
-        fontsize=14,
+        fontsize=6.5 * pt,
         rotation=90,
         ha="center",
         va="center",
@@ -323,17 +349,17 @@ def fig1_geometry():
         3.6,
         10.0,
         "IV headspace",
-        fontsize=19,
+        fontsize=8 * pt,
         ha="center",
         va="center",
         color="#4A6B7C",
         zorder=7,
     )
     ax.text(
-        -4.9,
+        -4.75,
         7.95,
-        "free-surface /\nsparging release",
-        fontsize=16.5,
+        "free-surface\n/ sparging\nrelease",
+        fontsize=7 * pt,
         ha="center",
         va="center",
         color=IVC,
@@ -342,8 +368,8 @@ def fig1_geometry():
     ax.text(
         4.75,
         7.55,
-        "wall release to IV",
-        fontsize=16.5,
+        "wall release\nto IV",
+        fontsize=7 * pt,
         ha="center",
         va="center",
         color=IVC,
@@ -352,8 +378,8 @@ def fig1_geometry():
     ax.text(
         6.6,
         2.45,
-        "wall release to OV",
-        fontsize=16.5,
+        "wall release\nto OV",
+        fontsize=7 * pt,
         ha="right",
         va="center",
         color="#8A3A0E",
@@ -363,14 +389,14 @@ def fig1_geometry():
         -8.85,
         -1.05,
         "OV enclosure",
-        fontsize=19,
+        fontsize=8 * pt,
         ha="left",
         va="center",
         color="#9C4A14",
         zorder=7,
     )
 
-    def collection_box(cx, color, text, w=3.9):
+    def collection_box(cx, color, text, w=4.6):
         ax.add_patch(
             FancyBboxPatch(
                 (cx - w / 2, BOX_Z),
@@ -388,23 +414,23 @@ def fig1_geometry():
             BOX_Z + BOX_H / 2,
             text,
             color=color,
-            fontsize=16.5,
+            fontsize=7 * pt,
             fontweight="bold",
             ha="center",
             va="center",
             zorder=9,
         )
 
-    collection_box(-6.9, C_FLOW, "He / H₂ sweep")
-    collection_box(3.1, IVC, "IV collection")
-    collection_box(7.7, OVC, "OV collection")
+    collection_box(-7.0, C_FLOW, "He / H₂ sweep", w=5.2)
+    collection_box(2.5, IVC, "IV collection")
+    collection_box(8.0, OVC, "OV collection")
     for x in (-5.4, -1.8, 1.8, 5.4):
         arrow(x, -3.30, x, OVB - 0.12, C_FLOW, lw=2.6, ms=20, z=6)
     ax.text(
         0.0,
         -3.85,
         "neutrons",
-        fontsize=20,
+        fontsize=8 * pt,
         ha="center",
         va="center",
         color=C_FLOW,
@@ -778,66 +804,56 @@ def run_panel(spec, tag, run, band):
     else:
         ax.tick_params(labelbottom=False)
         for s, e in blocks:
-            strip.axvspan(s, e, facecolor=CYC, edgecolor=CYC, alpha=0.75, lw=1.0)
+            strip.axvspan(s, e, facecolor=CYC, edgecolor=CYC, alpha=0.75, lw=0.6)
         strip.set_xlabel("time [day]", fontsize=FS_LABEL)
         strip.set_ylim(0, 1)
         strip.set_yticks([])
         strip.set_ylabel(
             "cyclotron\nbeam-on",
-            fontsize=FS_LABEL - 2,
+            fontsize=FS_SW,
             color=CYC,
             rotation=0,
             ha="right",
             va="center",
-            labelpad=8,
+            labelpad=4,
         )
         for sp in ("top", "right", "left"):
             strip.spines[sp].set_visible(False)
 
 
+def legend_band(fig, cyc_run):
+    """Legend of Figs. 3 and 4: data, model, the admissible band and the run without its cyclotron."""
+    extra = [
+        (Patch(color=IVC, alpha=0.16), "IV, admissible parameter sets"),
+        (Patch(color=OVC, alpha=0.16), "OV, admissible parameter sets"),
+    ]
+    if cyc_run in NO_CYC:
+        extra += [
+            (Line2D([], [], **LN_IV_DASH), "IV, no cyclotron source"),
+            (Line2D([], [], **LN_OV_DASH), "OV, no cyclotron source"),
+        ]
+    legend(fig, extra)
+
+
 def fig3_training():
-    fig = plt.figure(figsize=(10.6, 8.9))
-    g = fig.add_gridspec(2, 2, hspace=0.30, wspace=0.28)
+    fig = plt.figure(figsize=(TEXT_W, 6.0))
+    g = fig.add_gridspec(2, 2, hspace=0.24, wspace=0.26)
     for i, (tag, r) in enumerate(
         (("(a) Run 1", 1), ("(b) Run 2", 2), ("(c) Run 3", 3), ("(d) Run 12", 12))
     ):
         run_panel(g[i // 2, i % 2], tag, r, band=True)
-    # spread of the admissible parameter sets behind the held-out ranges of Fig. 4
-    legend(
-        fig,
-        [
-            (Patch(color=IVC, alpha=0.16), "IV, admissible parameter sets"),
-            (Patch(color=OVC, alpha=0.16), "OV, admissible parameter sets"),
-        ]
-        + (
-            [
-                (Line2D([], [], **LN_IV_DASH), "IV, no cyclotron"),
-                (Line2D([], [], **LN_OV_DASH), "OV, no cyclotron"),
-            ]
-            if 3 in NO_CYC
-            else []
-        ),
-    )
-    fig.subplots_adjust(top=0.875, bottom=0.07, left=0.10, right=0.985)
+    legend_band(fig, 3)
+    fig.subplots_adjust(top=0.89, bottom=0.07, left=0.09, right=0.99)
     save(fig, "fig3_training")
 
 
 def fig4_prediction():
-    fig = plt.figure(figsize=(12.0, 5.6))
-    g = fig.add_gridspec(1, 2, wspace=0.25, width_ratios=[1.5, 1.0])
+    fig = plt.figure(figsize=(TEXT_W, 3.6))
+    g = fig.add_gridspec(1, 2, wspace=0.24, width_ratios=[1.5, 1.0])
     run_panel(g[0], "(a) Run 4", 4, band=True)
     run_panel(g[1], "(b) Run 6", 6, band=True)
-    extra = [
-        (Patch(color=IVC, alpha=0.16), "IV admissible range"),
-        (Patch(color=OVC, alpha=0.16), "OV admissible range"),
-    ]
-    if 4 in NO_CYC:
-        extra += [
-            (Line2D([], [], **LN_IV_DASH), "IV, no run-4 cyclotron"),
-            (Line2D([], [], **LN_OV_DASH), "OV, no run-4 cyclotron"),
-        ]
-    legend(fig, extra)
-    fig.subplots_adjust(top=0.78, bottom=0.10, left=0.08, right=0.985)
+    legend_band(fig, 4)
+    fig.subplots_adjust(top=0.80, bottom=0.12, left=0.09, right=0.99)
     save(fig, "fig4_prediction")
 
 
@@ -920,26 +936,26 @@ def fig5_inventory():
 
     with plt.rc_context(
         {
-            "font.size": 9,
+            "font.size": 8,
             "axes.edgecolor": INK2,
             "axes.labelcolor": INK,
             "xtick.color": INK2,
             "ytick.color": INK2,
-            "axes.linewidth": 0.8,
-            "xtick.labelsize": 8,
-            "ytick.labelsize": 9,
+            "axes.linewidth": 0.7,
+            "xtick.labelsize": 7,
+            "ytick.labelsize": 7.5,
         }
     ):
-        fig = plt.figure(figsize=(11.0, 6.6), facecolor=SURF)
+        fig = plt.figure(figsize=(TEXT_W, 4.9), facecolor=SURF)
         gs = fig.add_gridspec(
             4,
             1,
             height_ratios=[1.15, 0.10, 0.10, 1.0],
-            hspace=0.10,
-            left=0.075,
+            hspace=0.12,
+            left=0.105,
             right=0.995,
-            top=0.885,
-            bottom=0.085,
+            top=0.855,
+            bottom=0.09,
         )
         top = fig.add_subplot(gs[0])
         strip = fig.add_subplot(gs[1], sharex=top)
@@ -948,7 +964,7 @@ def fig5_inventory():
         strip.tick_params(axis="x", labelbottom=False)
         for ax in (top, bot):
             ax.set_facecolor(SURF)
-            ax.grid(axis="y", color=GRID, lw=0.6, zorder=1)
+            ax.grid(axis="y", color=GRID, lw=0.5, zorder=1)
             ax.set_axisbelow(True)
             for sp in ("top", "right"):
                 ax.spines[sp].set_visible(False)
@@ -966,21 +982,21 @@ def fig5_inventory():
                 xm(r, data[r]["salt"][0]),
                 data[r]["salt"][1],
                 color=C_MELT,
-                lw=1.7,
+                lw=1.2,
                 zorder=4,
             )
             top.plot(
                 xm(r, data[r]["wall"][0]),
                 data[r]["wall"][1],
                 color=C_WALL,
-                lw=1.7,
+                lw=1.2,
                 zorder=4,
             )
             bot.plot(
-                xm(r, data[r]["iv"][0]), data[r]["iv"][1], color=IVC, lw=1.7, zorder=4
+                xm(r, data[r]["iv"][0]), data[r]["iv"][1], color=IVC, lw=1.2, zorder=4
             )
             bot.plot(
-                xm(r, data[r]["ov"][0]), data[r]["ov"][1], color=OVC, lw=1.7, zorder=4
+                xm(r, data[r]["ov"][0]), data[r]["ov"][1], color=OVC, lw=1.2, zorder=4
             )
             ticks += [xm(r, d) for d in XTICKS[r]]
             tlabels += [str(d) for d in XTICKS[r]]
@@ -1008,7 +1024,7 @@ def fig5_inventory():
                 transform=top.get_xaxis_transform(),
                 ha="center",
                 va="bottom",
-                fontsize=9.5,
+                fontsize=8.5,
                 fontweight="bold",
                 color=INK,
             )
@@ -1025,7 +1041,7 @@ def fig5_inventory():
                 transform=top.get_xaxis_transform(),
                 ha="center",
                 va="bottom",
-                fontsize=7.5,
+                fontsize=7,
                 color=INK2,
             )
         bot.set_xticks(ticks)
@@ -1054,21 +1070,21 @@ def fig5_inventory():
                 ax.axvline(
                     xs,
                     color=INK2 if reset else C_FAINT,
-                    lw=1.4 if reset else 0.8,
+                    lw=1.0 if reset else 0.6,
                     ls=(0, (3, 2.5)) if reset else (0, (4, 3)),
                     zorder=3,
                 )
             if reset:
                 top.text(
-                    xs + 0.03,
-                    1.10,
+                    xs,
+                    1.025,
                     "state\nreset",
                     transform=top.get_xaxis_transform(),
-                    ha="left",
+                    ha="center",
                     va="bottom",
                     fontsize=7,
                     color=INK2,
-                    linespacing=1.0,
+                    linespacing=1.25,
                 )
             else:  # inventories carried to the next run
                 top.text(
@@ -1083,30 +1099,30 @@ def fig5_inventory():
                 )
         strip.set_ylim(-0.6, 1.6)
         strip.set_yticks([1.0, 0.0])
-        strip.set_yticklabels(["irradiation", "cyclotron"], fontsize=6.5, color=INK2)
+        strip.set_yticklabels(["irradiation", "cyclotron"], fontsize=7, color=INK2)
         strip.tick_params(axis="both", length=0)
         for y in (1.0, 0.0):
             strip.axhline(y, color=GRID, lw=0.6, zorder=1)
         for sp in strip.spines.values():
             sp.set_visible(False)
         fig.text(
-            0.013,
+            0.008,
             0.5 * (top.get_position().y1 + bot.get_position().y0),
             "Tritium inventory (Bq)",
             rotation=90,
             ha="center",
             va="center",
-            fontsize=9,
+            fontsize=8.5,
             color=INK,
         )
         pt = top.get_position()
         fig.text(
             0.5 * (pt.x0 + pt.x1),
-            pt.y1 + 0.19 * (pt.y1 - pt.y0) + 0.012,
+            pt.y1 + 0.24 * (pt.y1 - pt.y0) + 0.012,
             "(a) Breeder-side inventory",
             ha="center",
             va="bottom",
-            fontsize=9.5,
+            fontsize=8.5,
             color=INK,
         )
         fig.text(
@@ -1115,39 +1131,41 @@ def fig5_inventory():
             "(b) Downstream holdup",
             ha="center",
             va="center",
-            fontsize=9.5,
+            fontsize=8.5,
             color=INK,
         )
         fig.text(
             0.535,
-            0.02,
+            0.012,
             "days since the first irradiation of each run",
             ha="center",
             va="bottom",
-            fontsize=9,
+            fontsize=8.5,
             color=INK,
         )
         top.legend(
             handles=[
-                Line2D([], [], color=C_MELT, lw=1.7, label="ClLiF salt"),
-                Line2D([], [], color=C_WALL, lw=1.7, label="Inconel 625"),
+                Line2D([], [], color=C_MELT, lw=1.2, label="ClLiF salt"),
+                Line2D([], [], color=C_WALL, lw=1.2, label="Inconel 625"),
             ],
             loc="upper left",
-            bbox_to_anchor=(0.012, 0.98),
+            bbox_to_anchor=(0.0, 0.98),
             frameon=False,
             fontsize=7.5,
-            handlelength=1.6,
+            handlelength=1.3,
+            handletextpad=0.5,
         )
         bot.legend(
             handles=[
-                Line2D([], [], color=IVC, lw=1.7, label="IV holdup"),
-                Line2D([], [], color=OVC, lw=1.7, label="OV holdup"),
+                Line2D([], [], color=IVC, lw=1.2, label="IV holdup"),
+                Line2D([], [], color=OVC, lw=1.2, label="OV holdup"),
             ],
             loc="upper left",
-            bbox_to_anchor=(0.012, 0.98),
+            bbox_to_anchor=(0.0, 0.98),
             frameon=False,
             fontsize=7.5,
-            handlelength=1.6,
+            handlelength=1.3,
+            handletextpad=0.5,
         )
         save(fig, "fig5_inventory")
     for r in experimental_data.RUNS:
@@ -1467,8 +1485,8 @@ LABELS = {
     "Bi": "Bi",
     "lam_h2": "$\\lambda_{\\mathrm{H}_2}$ [1/s]",
     "lam_he": "$\\lambda_\\mathrm{He}$ [1/s]",
-    "L_he": "$L_\\mathrm{He}$ [m$^{-2}$s$^{-1}$Pa$^{-1}$]",
-    "L_h2": "$L_{\\mathrm{H}_2}$ [m$^{-2}$s$^{-1}$Pa$^{-1}$]",
+    "L_he": "$L_\\mathrm{He}$\n[m$^{-2}$s$^{-1}$Pa$^{-1}$]",
+    "L_h2": "$L_{\\mathrm{H}_2}$\n[m$^{-2}$s$^{-1}$Pa$^{-1}$]",
     "alpha_iv": "$\\alpha_\\mathrm{IV}$",
     "alpha_ov": "$\\alpha_\\mathrm{OV}$",
     "k_iv": "$k_\\mathrm{IV}$ [1/s]",
@@ -1492,7 +1510,7 @@ def fig7_parameter_ranges():
     best = min([post0] + [p["post"] for p in pts])
     names = [n for n, *_ in parameters.SPACE]
     ncol = 6
-    fig, axes = plt.subplots((len(names) + ncol - 1) // ncol, ncol, figsize=(17, 8.6))
+    fig, axes = plt.subplots((len(names) + ncol - 1) // ncol, ncol, figsize=(TEXT_W, 4.9))
     for ax, n in zip(axes.flat, names):
         xs = np.array([base[n]] + [p["value"] for p in pts if p["param"] == n])
         ys = np.array([post0] + [p["post"] for p in pts if p["param"] == n]) - best
@@ -1512,29 +1530,30 @@ def fig7_parameter_ranges():
                 else f"{label} [$10^{{{e}}}$]"
             )
         ax.axhspan(0, thr, color="#E4F3EE", lw=0, zorder=0)
-        ax.axhline(thr, color=SWC, ls=(0, (5, 3)), lw=1.2, zorder=1)
-        ax.plot(xs[o] / scale, ys[o], "-o", color="#2a78d6", ms=3.5, lw=1.4, zorder=3)
-        ax.plot(base[n] / scale, post0 - best, "o", color="#0b0b0b", ms=6, zorder=4)
+        ax.axhline(thr, color=SWC, ls=(0, (4, 2.5)), lw=0.8, zorder=1)
+        ax.plot(xs[o] / scale, ys[o], "-o", color="#2a78d6", ms=2.2, lw=0.9, zorder=3)
+        ax.plot(base[n] / scale, post0 - best, "o", color="#0b0b0b", ms=3.8, zorder=4)
         if log_axis:
             ax.set_xscale("log")
             ax.xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
         else:
-            ax.xaxis.set_major_locator(matplotlib.ticker.MaxNLocator(4))
+            ax.xaxis.set_major_locator(matplotlib.ticker.MaxNLocator(3))
         ax.set_ylim(-0.3, 2.2 * thr)
-        ax.set_xlabel(label, fontsize=12)
-        ax.tick_params(labelsize=9)
+        ax.set_xlabel(label, fontsize=8, labelpad=2)
+        ax.tick_params(labelsize=7, pad=2)
+        ax.set_yticks([0, 5, 10])
         ax.grid(alpha=0.18)
         for sp in ("top", "right"):
             ax.spines[sp].set_visible(False)
     for ax in axes[:, 0]:
-        ax.set_ylabel("$\\Delta$(−log posterior)", fontsize=11)
+        ax.set_ylabel("$\\Delta$(−log posterior)", fontsize=8)
     for ax in list(axes.flat)[len(names) :]:
         ax.axis("off")
     fig.legend(
         [
-            Line2D([], [], color="#2a78d6", marker="o", ms=3.5, lw=1.4),
-            Line2D([], [], color="#0b0b0b", marker="o", ms=6, ls="none"),
-            Line2D([], [], color=SWC, ls=(0, (5, 3)), lw=1.2),
+            Line2D([], [], color="#2a78d6", marker="o", ms=2.2, lw=0.9),
+            Line2D([], [], color="#0b0b0b", marker="o", ms=3.8, ls="none"),
+            Line2D([], [], color=SWC, ls=(0, (4, 2.5)), lw=0.8),
         ],
         [
             "profile (all other parameters re-optimised)",
@@ -1543,12 +1562,13 @@ def fig7_parameter_ranges():
         ],
         loc="upper center",
         ncol=3,
-        fontsize=12,
+        fontsize=8,
+        columnspacing=1.5,
         frameon=False,
         bbox_to_anchor=(0.5, 1.0),
     )
     fig.subplots_adjust(
-        top=0.93, bottom=0.08, left=0.05, right=0.99, hspace=0.55, wspace=0.32
+        top=0.92, bottom=0.09, left=0.075, right=0.995, hspace=0.75, wspace=0.38
     )
     save(fig, "fig7_parameter_ranges")
 
