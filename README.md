@@ -1,4 +1,5 @@
 # BABY-1L tritium transport
+[![DOI](https://zenodo.org/badge/1196592596.svg)](https://doi.org/10.5281/zenodo.23987644)
 
 > This project started from
 > [LIBRA-project/BABY-tritium-transport](https://github.com/LIBRA-project/BABY-tritium-transport)
