@@ -1,0 +1,37 @@
+# Starting point of calibrate.py: the 0-D fit of the speciation network (no direct-to-metal
+# branching, HT uptake linear in H2), with the source of the transport model's calibration.
+
+# --- source (fixed at the transport model's calibration)
+tbr       = 0.002324731111997187     # [-] tritium breeding ratio
+rho_1     = 1.285924015189109        # [-] run 1 neutron-rate factor
+rho_2     = 1.0378919160704672       # [-] run 2 neutron-rate factor
+rho_3     = 0.8819344319429658       # [-] run 3 neutron-rate factor
+rho_4     = 1.0                      # [-] run 4 neutron-rate factor
+rho_6     = 1.0                      # [-] run 6 neutron-rate factor
+rho_12    = 1.0464290748307485       # [-] run 12 neutron-rate factor
+eta       = 127276486681098.61       # [atoms/C] tritium per logged cyclotron charge (logged C = true C / 1440)
+
+# --- melt chemistry
+k_red     = 9.195304887450302e-07    # [1/s] TF -> HT, always on (reduction by the wall metal and impurities)
+k_sp      = 2.245862171284051e-06    # [1/s] extra TF -> HT when gas is bubbled through the melt
+k_x       = 1.88097595014294e-05     # [1/s] extra TF -> HT by exchange with H2, at 1000 ppm
+n_x       = 0.5474773258280049       # [-] order of the exchange in the H2 fraction
+k_w       = 8.42941603369824e-06     # [1/s] HT uptake by the wetted wall, v_w A_wet / V, under He
+k_w_h2    = 2.9588167498003984e-07   # [1/s] increase of the HT uptake per 1000 ppm H2
+x_bg      = 8.922992266881298e-06    # [ppm] hydrogen background of the He sweep gas, as H2
+
+# --- release paths
+k_s       = 8.190672056352192e-05    # [1/s] HT through the free surface, k_L A_free / V
+e_sp      = 0.09380977316098957      # [-] HT stripped by the bubbles, as a fraction of Henry equilibrium
+k_tf_s    = 2.198839804603563e-09    # [1/s] TF vapour through the free surface
+k_tf_sp   = 1.3031251142638184e-07   # [1/s] TF carried out by the bubbles
+k_hto     = 6.98681093145358e-10     # [m/s] HTO release velocity of the oxidised outer faces
+
+# --- collection-line holdup
+alpha_iv  = 0.04255521583460454      # [-] IV-line deposition fraction of the insoluble stream
+alpha_ov  = 0.9387389787512612       # [-] OV-line deposition fraction of the insoluble stream
+k_iv      = 1.3728890833516122e-05   # [1/s] IV holdup release rate at 1000 ppm H2
+k_ov      = 1.616929605669011e-07    # [1/s] OV holdup release rate at 1000 ppm H2
+k_iv_he   = 7.168635553388782e-08    # [1/s] IV holdup release rate under He
+k_ov_he   = 5.691986863952277e-09    # [1/s] OV holdup release rate under He
+

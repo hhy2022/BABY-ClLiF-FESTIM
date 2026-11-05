@@ -196,3 +196,6 @@ figures/
 *.npz
 *.npy
 *.jsonl
+
+# speciation model output, written by speciation_model/run_all.sh
+speciation_model/out/
